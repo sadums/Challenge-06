@@ -6,8 +6,19 @@ var geocodingRequestURL = `http://api.openweathermap.org/geo/1.0/direct?q=${city
 
 var getCity = function(){
     fetch(geocodingRequestURL)
-    .then(response => response.text())
+    .then(response => response.json())
     .then(result => console.log(result))
     .catch(error => console.log('error', error));
 }
 
+var latitude = 51.5085;
+var longitude = -0.1257;
+
+var weatherRequestURL = `http://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+
+var getWeather = function(){
+    fetch(weatherRequestURL)
+    .then(response => response.json())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
+}
