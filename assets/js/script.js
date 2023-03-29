@@ -1,7 +1,7 @@
 /* API CALLS */ 
 var API_KEY = "f958d5799c0e9323c09bec4b41b7efee";
 var limit = 1;
-var cityName;
+var cityName = null;
 
 var geocodingRequestURL = `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=${limit}&appid=${API_KEY}`;
 
@@ -30,22 +30,44 @@ var searchText = document.getElementById('searchInput');
 var searchButton = document.getElementById('searchButton');
 var searchHistory = document.getElementById('searchHistory');
 
-var addToHistory = function(search){
-    var searchCard = document.createElement("div");
+var addToHistory = function(searchText){
+    // store to local storage
+    var historyArray = JSON.parse(localStorage.getItem("searchHistory"));
+    historyArray.push(searchText);
+    localStorage.setItem("searchHistory", JSON.stringify(historyArray));
+
+    // add as an element to page
+    var searchCard = document.createElement("button");
     searchCard.innerHTML = `
-    <div class="card text-white bg-secondary p-0 my-2">
-        <div class="card-body p-1 text-center">
-            <h4 class="card-title">${search}</h4>
-        </div>
+    <div class="card-body p-1 text-center" id="${searchText}">
+        <h4 class="card-title" id="${searchText}">${searchText}</h4>
     </div>
     `;
-    searchCard.setAttribute("id", search);
-
+    searchCard.setAttribute("id", searchText);
+    searchCard.setAttribute("class", "card text-white bg-secondary p-0 my-2 w-100 align-items-center");
     searchHistory.append(searchCard);
+
+    searchCard.addEventListener("click", search);
 }
 
 var search = function(event){
-    addToHistory(searchText.value);
+    var enteredCity;
+    if(event.target.getAttribute('id') === 'searchButton' && searchText.value){
+        enteredCity = searchText.value;
+        addToHistory(enteredCity);
+        searchText.value = "";
+    }else if(event.target.id != 'searchButton'){
+        enteredCity = event.target.id;
+    }
+    if(enteredCity){
+        console.log("testing")
+    }
 }
 
 searchButton.addEventListener("click", search);
+
+
+// Set search history array if it is not made
+if(localStorage.getItem("searchHistory")){
+    localStorage.setItem("searchHistory", JSON.stringify([]));
+}
