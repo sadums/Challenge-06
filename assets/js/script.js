@@ -23,7 +23,6 @@ var getCity = function(cityName1){
     fetch(geocodingRequestURL)
     .then(response => response.json())
     .then(function(result){
-        console.log(result);
         if(result != undefined){
             latitude = result[0].lat;
             longitude = result[0].lon;
@@ -39,11 +38,10 @@ var longitude;
 var weatherObject;
 
 var getWeather = function(lat1, lon1, cityName1){
-    var weatherRequestURL = `http://api.openweathermap.org/data/2.5/forecast?lat=${lat1}&lon=${lon1}&appid=${API_KEY}&units=imperial`;
+    var weatherRequestURL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat1}&lon=${lon1}&appid=${API_KEY}&units=imperial`;
     fetch(weatherRequestURL)
     .then(response => response.json())
     .then(function(result){
-        console.log(result);
         for(var i = 0; i < dayReportArray.length; i++){
             var title = dayReportArray[i].children[0];
             var body = dayReportArray[i].children[1];
@@ -112,7 +110,7 @@ var search = function(event){
         cityName = event.target.id;
     }
     if(cityName){
-        geocodingRequestURL = `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=${limit}&appid=${API_KEY}`;
+        geocodingRequestURL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=${limit}&appid=${API_KEY}`;
         getCity(cityName);
     }
 }
