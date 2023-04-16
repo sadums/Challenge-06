@@ -4,6 +4,7 @@ var limit = 1;
 var cityName;
 
 var weatherReports = document.getElementById('weatherReports');
+let searchSection = document.getElementById('search');
 
 var weatherReportTitle = document.getElementById("weatherReport").children[0].children[0];
 var weatherReportBody = document.getElementById("weatherReport").children[0].children[1];
@@ -61,7 +62,8 @@ var getWeather = function(lat1, lon1, cityName1){
                 weatherReportBody.innerHTML = `Temp: ${temp} <br>Humidity: ${humidity}  <br>Wind: ${wind} MPH`;
             }
         }
-        weatherReports.setAttribute('style', 'visibility: visible;');
+        searchSection.setAttribute('class', "col-lg-2");
+        weatherReports.setAttribute('style', 'display: block;');
     })
     .catch(error => console.log('error', error));
 }
@@ -118,6 +120,28 @@ var search = function(event){
 searchButton.addEventListener("click", search);
 
 // Set search history array if it is not made
-if(localStorage.getItem("searchHistory")){
+if(!localStorage.getItem("searchHistory")){
     localStorage.setItem("searchHistory", JSON.stringify([]));
+}
+if(localStorage.getItem(("searchHistory"))){
+    let historyArray = JSON.parse(localStorage.getItem("searchHistory"));
+    for(let i = 0; i < historyArray.length; i++){
+        let searchText = historyArray[i];
+        let searchCard = document.createElement("button");
+        searchCard.innerHTML = `
+        <div class="card-body p-1 text-center" id="${searchText}">
+            <h4 class="card-title" id="${searchText}">${searchText}</h4>
+        </div>
+        `;
+        searchCard.setAttribute("id", searchText);
+        searchCard.setAttribute("class", "card text-white bg-secondary p-0 my-2 w-100 align-items-center");
+        searchHistory.prepend(searchCard);
+    
+        searchCard.addEventListener("click", search);
+    
+        // limit search history to five
+        if(searchHistory.children.length > 5){
+            searchHistory.children[5].remove();
+        }
+    }
 }
