@@ -1,26 +1,68 @@
 /* API CALLS */ 
 var API_KEY = "f958d5799c0e9323c09bec4b41b7efee";
 var limit = 1;
-var cityName = null;
+var cityName;
 
-var geocodingRequestURL = `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=${limit}&appid=${API_KEY}`;
+var weatherReports = document.getElementById('weatherReports');
 
-var getCity = function(){
+var weatherReportTitle = document.getElementById("weatherReport").children[0].children[0];
+var weatherReportBody = document.getElementById("weatherReport").children[0].children[1];
+
+var fiveDayReportElement = document.getElementById('5dayWeatherReport').children[0];
+var dayReportArray = [];
+
+for(var i = 0; i < fiveDayReportElement.children.length; i++){
+    var dayReport = fiveDayReportElement.children[i].children[0].children[0];
+    dayReportArray.push(dayReport);
+}
+
+var geocodingRequestURL;
+
+var getCity = function(cityName1){
     fetch(geocodingRequestURL)
     .then(response => response.json())
-    .then(result => console.log(result))
+    .then(function(result){
+        console.log(result);
+        if(result != undefined){
+            latitude = result[0].lat;
+            longitude = result[0].lon;
+            getWeather(result[0].lat, result[0].lon, cityName1);
+        }
+    })
     .catch(error => console.log('error', error));
 }
 
 var latitude;
 var longitude;
 
-var weatherRequestURL = `http://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`;
+var weatherObject;
 
-var getWeather = function(){
+var getWeather = function(lat1, lon1, cityName1){
+    var weatherRequestURL = `http://api.openweathermap.org/data/2.5/forecast?lat=${lat1}&lon=${lon1}&appid=${API_KEY}&units=imperial`;
     fetch(weatherRequestURL)
     .then(response => response.json())
-    .then(result => console.log(result))
+    .then(function(result){
+        console.log(result);
+        for(var i = 0; i < dayReportArray.length; i++){
+            var title = dayReportArray[i].children[0];
+            var body = dayReportArray[i].children[1];
+            var day = i * 8 + 4;
+            
+            var date = result.list[day].dt_txt.split(" ")[0].split("-")[1] + "/" + result.list[day].dt_txt.split(" ")[0].split("-")[2]
+            var temp = result.list[day].main.temp;
+            var humidity = result.list[day].main.humidity;
+            var wind = result.list[day].wind.speed;
+            var icon = result.list[day].weather[0].icon;
+            var iconSrc = `https://openweathermap.org/img/wn/${icon}@2x.png`
+            title.innerHTML = date + "<img src=" + iconSrc + "></img>";
+            body.innerHTML = `Temp: ${temp} <br>Humidity: ${humidity}  <br>Wind: ${wind} MPH`;
+            if(i === 0){
+                weatherReportTitle.innerHTML = cityName1 + " " + date + "<img src=" + iconSrc + "></img>";
+                weatherReportBody.innerHTML = `Temp: ${temp} <br>Humidity: ${humidity}  <br>Wind: ${wind} MPH`;
+            }
+        }
+        weatherReports.setAttribute('style', 'visibility: visible;');
+    })
     .catch(error => console.log('error', error));
 }
 
@@ -32,7 +74,11 @@ var searchHistory = document.getElementById('searchHistory');
 
 var addToHistory = function(searchText){
     // store to local storage
-    var historyArray = JSON.parse(localStorage.getItem("searchHistory"));
+    if(localStorage.getItem("searchHistory") != null && localStorage.getItem("searchHistory") != undefined){
+        var historyArray = JSON.parse(localStorage.getItem("searchHistory"));
+    }else{
+        var historyArray = [];
+    }
     historyArray.push(searchText);
     localStorage.setItem("searchHistory", JSON.stringify(historyArray));
 
@@ -45,27 +91,31 @@ var addToHistory = function(searchText){
     `;
     searchCard.setAttribute("id", searchText);
     searchCard.setAttribute("class", "card text-white bg-secondary p-0 my-2 w-100 align-items-center");
-    searchHistory.append(searchCard);
+    searchHistory.prepend(searchCard);
 
     searchCard.addEventListener("click", search);
+
+    // limit search history to five
+    if(searchHistory.children.length > 5){
+        searchHistory.children[5].remove();
+    }
 }
 
 var search = function(event){
-    var enteredCity;
     if(event.target.getAttribute('id') === 'searchButton' && searchText.value){
-        enteredCity = searchText.value;
-        addToHistory(enteredCity);
+        cityName = searchText.value;
+        addToHistory(cityName);
         searchText.value = "";
     }else if(event.target.id != 'searchButton'){
-        enteredCity = event.target.id;
+        cityName = event.target.id;
     }
-    if(enteredCity){
-        console.log("testing")
+    if(cityName){
+        geocodingRequestURL = `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=${limit}&appid=${API_KEY}`;
+        getCity(cityName);
     }
 }
 
 searchButton.addEventListener("click", search);
-
 
 // Set search history array if it is not made
 if(localStorage.getItem("searchHistory")){

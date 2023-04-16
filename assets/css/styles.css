@@ -16,3 +16,7 @@ h2{
 .button:focus {
     outline: none;
 }
+
+#weatherReports{
+    visibility: hidden;
+}
